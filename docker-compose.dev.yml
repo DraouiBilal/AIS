@@ -1,0 +1,77 @@
+version: '3'
+services:
+  db-auth:
+    image: postgres:14.1-alpine
+    container_name: db-auth
+    restart: always
+    user: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/ais/postgresql/auth/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # db-history:
+  #   image: postgres:14.1-alpine
+  #   restart: always
+  #   user: postgres
+  #   container_name: db-history
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #   ports:
+  #     - '5433:5432'
+  #   volumes: 
+  #     - db:/var/lib/ais/postgresql/history/data
+  #   healthcheck:
+  #     test: [ "CMD-SHELL", "pg_isready" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  auth-service:
+    image: auth-service
+    container_name: auth-service
+    build:
+      context: /home/drale/Downloads/projects/web/AIS/services/AuthService/
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4000:4000"
+      - "5555:5555"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db-auth:5432/postgres
+      - PORT=4000
+      - SESSION_SECRET=92EfPdMp51lvDFfog75i
+      - NODE_ENV=DEV
+    depends_on:
+      db-auth:
+        condition: service_healthy
+    volumes:
+      - /tmp/AuthService/npm-cache:/root/.npm:z
+      - /home/drale/Downloads/projects/web/AIS/services/AuthService/src:/usr/src/app/src:z
+
+  mail-service:
+    image: mailing-service
+    container_name: mailing-service
+    build:
+      context: /home/drale/Downloads/projects/web/AIS/services/MailingService/
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - EMAIL_API_KEY=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
+      - NODE_ENV=DEV
+    volumes:
+      - /tmp/MailingService/npm-cache:/root/.npm:z
+      - /home/drale/Downloads/projects/web/AIS/services/MailingService/src:/usr/src/app/src:z
+volumes:
+  db:
+    driver: local

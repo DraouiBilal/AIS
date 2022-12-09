@@ -4,7 +4,7 @@ AIS is an application that will allow users to easily create and manage Machine 
 
 ## Architecture
 
-The application will be built following the microservices architecture, here a more detailed description of the architecture:
+The application will be built following the microservices architecture, here is a more detailed description of the architecture:
 
 ![Architecture](./extra/Architecture.png)
 
