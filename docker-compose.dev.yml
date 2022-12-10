@@ -67,7 +67,6 @@ services:
       - "4001:4001"
     environment:
       - PORT=4001
-      - EMAIL_API_KEY=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
       - NODE_ENV=DEV
     volumes:
       - /tmp/MailingService/npm-cache:/root/.npm:z
